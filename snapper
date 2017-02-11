@@ -56,7 +56,7 @@ fi
 s3cmd --force --access_key=$SNAPPER_AWS_KEY --secret_key=$SNAPPER_AWS_SECRET put $SNAPPER_DIR/$SNAP_FILENAME s3://$SNAPPER_BUCKET &>/dev/null
 
 # Copy s3 url to clipboard
-echo "http://$SNAPPER_HOST/$SNAP_FILENAME" | xsel --clipboard --input
+echo -n "http://$SNAPPER_HOST/$SNAP_FILENAME" | xsel --clipboard
 
 # Send desktop notification
 notify-send -i $SNAPPER_DIR/$SNAP_FILENAME "Snap in Clipboard"

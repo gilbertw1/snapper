@@ -43,7 +43,7 @@ UPLOAD_UNIQUE_FILENAME="$BASE-$UNIQUE_STRING.$EXTENSION"
 s3cmd --force --access_key=$SNAPPER_AWS_KEY --secret_key=$SNAPPER_AWS_SECRET put $UPLOAD_FILE s3://$SNAPPER_BUCKET/$UPLOAD_UNIQUE_FILENAME &>/dev/null
 
 # Copy s3 url to clipboard
-echo "http://$SNAPPER_HOST/$UPLOAD_UNIQUE_FILENAME" | xsel --clipboard --input
+echo -n "http://$SNAPPER_HOST/$UPLOAD_UNIQUE_FILENAME" | xsel --clipboard
 
 # Send desktop notification
 notify-send "Snap Upload in Clipboard: $FILENAME"
