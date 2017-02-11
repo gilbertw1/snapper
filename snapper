@@ -1,0 +1,34 @@
+#!/bin/sh
+
+SNAPPER_HOST='<host>'
+SNAPPER_DIR='~/.snapper'
+SNAPPER_BUCKET='<bucket>'
+AWS_KEY='<key>'
+AWS_SECRET='<secret>'
+
+# Ensure snapper temp drectory exists
+mkdir -p $SNAPPER_DIR
+
+# Generate snap file name
+SNAP_FILENAME="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1).png"
+
+# Allow user to specify area of screen to capture
+eval $(slop)
+
+# If screenshot was cancelled exit
+if [ $Cancel == true ]; then
+  echo "Cancelled"
+  exit
+fi
+
+# Use imagemagick to crop the the screen based on slop output
+import -window root -crop $G $SNAPPER_DIR/$SNAP_FILENAME
+
+# Upload file to S3
+s3cmd --force --access_key=$AWS_KEY --secret_key=$AWS_SECRET put $SNAPPER_DIR/$SNAP_FILENAME s3://$SNAPPER_BUCKET
+
+# Copy s3 url to clipboard
+echo "$SNAPPER_HOST/$SNAP_FILENAME" | xsel --clipboard --input
+
+# Send desktop notification
+notify-send -i $SNAPPER_DIR/$SNAP_FILENAME "Snap in Clipboard"

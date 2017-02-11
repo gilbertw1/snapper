@@ -1,0 +1,29 @@
+#!/bin/sh
+
+UPLOAD_FILE=$1
+SNAPPER_HOST='<host>'
+SNAPPER_BUCKET='<bucket>'
+AWS_KEY='<key>'
+AWS_SECRET='<secret>'
+
+# Verify File Exists
+if [ ! -f $UPLOAD_FILE ]; then
+  echo "File does not exist!"
+  exit
+fi
+
+# Create unique upload filename
+FILENAME=$(basename $UPLOAD_FILE)
+EXTENSION="${FILENAME##*.}"
+BASE="${FILENAME%.*}"
+UNIQUE_STRING="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1).png"
+UPLOAD_UNIQUE_FILENAME="$BASE-$UNIQUE_STRING.$EXTENSION"
+
+# Upload file to S3
+s3cmd --force --access_key=$AWS_KEY --secret_key=$AWS_SECRET put $UPLOAD_FILE s3://$SNAPPER_BUCKET/$UPLOAD_UNIQUE_FILENAME
+
+# Copy s3 url to clipboard
+echo "$SNAPPER_HOST/$UPLOAD_UNIQUE_FILENAME" | xsel --clipboard --input
+
+# Send desktop notification
+notify-send "Snap Upload in Clipboard: $FILENAME"
