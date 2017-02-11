@@ -1,10 +1,30 @@
 #!/bin/sh
 
 UPLOAD_FILE=$1
-SNAPPER_HOST='<host>'
-SNAPPER_BUCKET='<bucket>'
-AWS_KEY='<key>'
-AWS_SECRET='<secret>'
+
+# Source config file if it exists and validate required settings
+if [ -f ~/.config/snapper.conf ]; then
+  source ~/.config/snapper.conf
+fi
+
+if [ -z $SNAPPER_HOST ]; then
+  SNAPPER_HOST="http://s3.amazonaws.com/$SNAPPER_BUCKET"
+fi
+
+if [ -z $SNAPPER_BUCKET ]; then
+  echo "Error: SNAPPER_BUCKET not defined. Exiting."
+  exit 1
+fi
+
+if [ -z $SNAPPER_AWS_KEY ]; then
+  echo "Error: SNAPPER_AWS_KEY not defined. Exiting."
+  exit 1
+fi
+
+if [ -z $SNAPPER_AWS_KEY ]; then
+  echo "Error: SNAPPER_AWS_SECRET not defined. Exiting."
+  exit 1
+fi
 
 # Verify File Exists
 if [ ! -f $UPLOAD_FILE ]; then
@@ -16,11 +36,11 @@ fi
 FILENAME=$(basename $UPLOAD_FILE)
 EXTENSION="${FILENAME##*.}"
 BASE="${FILENAME%.*}"
-UNIQUE_STRING="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1).png"
+UNIQUE_STRING="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)"
 UPLOAD_UNIQUE_FILENAME="$BASE-$UNIQUE_STRING.$EXTENSION"
 
 # Upload file to S3
-s3cmd --force --access_key=$AWS_KEY --secret_key=$AWS_SECRET put $UPLOAD_FILE s3://$SNAPPER_BUCKET/$UPLOAD_UNIQUE_FILENAME
+s3cmd --force --access_key=$SNAPPER_AWS_KEY --secret_key=$SNAPPER_AWS_SECRET put $UPLOAD_FILE s3://$SNAPPER_BUCKET/$UPLOAD_UNIQUE_FILENAME &>/dev/null
 
 # Copy s3 url to clipboard
 echo "$SNAPPER_HOST/$UPLOAD_UNIQUE_FILENAME" | xsel --clipboard --input
