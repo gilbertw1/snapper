@@ -11,7 +11,7 @@ if [ -z $SNAPPER_DIR ]; then
 fi
 
 if [ -z $SNAPPER_HOST ]; then
-   SNAPPER_HOST="http://s3.amazonaws.com/$SNAPPER_BUCKET"
+   SNAPPER_HOST="s3.amazonaws.com/$SNAPPER_BUCKET"
 fi
 
 if [ -z $SNAPPER_BUCKET ]; then
@@ -36,7 +36,7 @@ mkdir -p $SNAPPER_DIR
 SNAP_FILENAME="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1).png"
 
 # Allow user to specify area of screen to capture
-eval $(slop)
+eval $(slop --color 0.275,0.510,0.706)
 
 # If screenshot was cancelled exit
 if [ $Cancel == true ]; then
@@ -47,13 +47,16 @@ fi
 # Use imagemagick to take and crop screenshot based on slop output
 import -window root -crop $G $SNAPPER_DIR/$SNAP_FILENAME
 
+if [ ! -f $SNAPPER_DIR/$SNAP_FILENAME ]; then
+  echo "Failed to create image"
+  exit 1
+fi
+
 # Upload file to S3
 s3cmd --force --access_key=$SNAPPER_AWS_KEY --secret_key=$SNAPPER_AWS_SECRET put $SNAPPER_DIR/$SNAP_FILENAME s3://$SNAPPER_BUCKET &>/dev/null
 
 # Copy s3 url to clipboard
-echo "$SNAPPER_HOST/$SNAP_FILENAME" | xsel --clipboard --input
-
-echo "$SNAPPER_DIR/$SNAP_FILENAME"
+echo "http://$SNAPPER_HOST/$SNAP_FILENAME" | xsel --clipboard --input
 
 # Send desktop notification
 notify-send -i $SNAPPER_DIR/$SNAP_FILENAME "Snap in Clipboard"

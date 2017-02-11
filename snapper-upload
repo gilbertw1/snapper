@@ -8,7 +8,7 @@ if [ -f ~/.config/snapper.conf ]; then
 fi
 
 if [ -z $SNAPPER_HOST ]; then
-  SNAPPER_HOST="http://s3.amazonaws.com/$SNAPPER_BUCKET"
+  SNAPPER_HOST="s3.amazonaws.com/$SNAPPER_BUCKET"
 fi
 
 if [ -z $SNAPPER_BUCKET ]; then
@@ -43,7 +43,7 @@ UPLOAD_UNIQUE_FILENAME="$BASE-$UNIQUE_STRING.$EXTENSION"
 s3cmd --force --access_key=$SNAPPER_AWS_KEY --secret_key=$SNAPPER_AWS_SECRET put $UPLOAD_FILE s3://$SNAPPER_BUCKET/$UPLOAD_UNIQUE_FILENAME &>/dev/null
 
 # Copy s3 url to clipboard
-echo "$SNAPPER_HOST/$UPLOAD_UNIQUE_FILENAME" | xsel --clipboard --input
+echo "http://$SNAPPER_HOST/$UPLOAD_UNIQUE_FILENAME" | xsel --clipboard --input
 
 # Send desktop notification
 notify-send "Snap Upload in Clipboard: $FILENAME"
