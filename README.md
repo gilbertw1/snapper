@@ -3,6 +3,8 @@ snapper
 
 A simple screenshot and file upload tool for linux that works directly with S3.
 
+![Snapper](snapper.jpg)
+
 
 Dependencies
 ------------
